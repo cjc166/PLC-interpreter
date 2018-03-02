@@ -5,6 +5,16 @@
 ; determines the correct return value
 
 
+;FOR INTERPRETER PT 2:
+; ADD A CONDITION FOR BEGIN IN M.STATE
+; then, have a function for begin, which will continuous call
+; Mstate on each list in the block ((car lis))
+
+;ADD A CONDITION FOR BREAK
+
+
+;ADD A CONDITION FOR CONTINUE
+
 (load "simpleParser.scm")
 (load "state.scm")
 
