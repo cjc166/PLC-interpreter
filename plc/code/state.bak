@@ -4,31 +4,31 @@
 
 (define declared car)
 (define assignments cadr)
-(define M-state-init '((return) ('())))
+(define M.state.init '((return) ('())))
 
 ;declared will contain variables that have been declared
 ;assignments will contain the values of each variable
 ;if the variable has not been initialized, then the value will be '()
 
 ; sets the variable return
-(define M-set-return
+(define M.set.return
   (lambda (state lis)
-    (M-state-setVar state (car lis) (cadr lis))))
+    (M.state.setVar state (car lis) (cadr lis))))
 
 ;gets the variable return
-(define M-get-return
+(define M.get.return
   (lambda (state)
     (cond
-      ((eq? (M-state-getVar state 'return) #f) 'false)
-      ((eq? (M-state-getVar state 'return) #t) 'true)
-      (else (M-state-getVar state 'return)))))
+      ((eq? (M.state.getVar state 'return) #f) 'false)
+      ((eq? (M.state.getVar state 'return) #t) 'true)
+      (else (M.state.getVar state 'return)))))
     
 
 ;find the index
 ;return the value
 ;getvar
 
-(define M-state-getVar
+(define M.state.getVar
   (lambda (state variable)
     (cond
       ;if variable has been declared
@@ -40,7 +40,7 @@
          
 
 ; updates the value of a variable, returns the entire updated state
-(define M-state-setVar
+(define M.state.setVar
   (lambda (state variable value)
 
     ;then update its value in the assignments list
@@ -49,7 +49,7 @@
       ((> (indexof variable (declared state)) -1)
        ;then replace the assigned value with value and return the new state
        ;setindex (state index newvalue)
-       (cons (declared state) (cons (setIndexValue (assignments state) (indexof variable (declared state)) (M-value value state)) '())))
+       (cons (declared state) (cons (setIndexValue (assignments state) (indexof variable (declared state)) (M.value value state)) '())))
       
       ; else variable has not been declared
       ;and throw error
@@ -57,16 +57,16 @@
       (else (error "Using variable before declaring")))))
     
 ;declare variable
-; e-g- var x;
-(define M-state-declare-var
+; e.g. var x;
+(define M.state.declare.var
   (lambda (var state)
     (cons (myappend var (declared state)) (cons (cons '() (assignments state)) '()))))
 
 ;declare and initialize
-; e-g- var x = 5;
-(define M-state-declare-initialize
+; e.g. var x = 5;
+(define M.state.declare.initialize
   (lambda (var value state)
-    (cons (cons var (declared state)) (cons (cons (M-value value state) (assignments state)) '()))))
+    (cons (cons var (declared state)) (cons (cons (M.value value state) (assignments state)) '()))))
 
 ;HELPER METHODS FOR INDEXING THRU STATE
 
