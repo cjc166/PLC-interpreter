@@ -248,5 +248,3 @@
 (define M-state-begin
  (lambda (state lis)
   (removeLayer (M-state lis (addLayer state)))))
-
-
