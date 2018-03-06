@@ -1,10 +1,18 @@
 ; Caleb Cain, Grace Dai, Savita Medlang
 ; State Abstraction
 
+(load "projectOne.scm")
+
 
 (define declared car)
 (define assignments cadr)
 (define M-state-init '((return) ('())))
+
+(define current
+  (lambda (state)
+    (cond
+      ((null? state) '())
+      (else (car state)))))
 
 ;declared will contain variables that have been declared
 ;assignments will contain the values of each variable
@@ -31,12 +39,16 @@
 (define M-state-getVar
   (lambda (state variable)
     (cond
-      ;if variable has been declared
-      ((> (indexof variable (declared state)) -1)
+      ((null? state) (error "Using before declaring"))
+      
+      ;if variable has been found in the current state list
+      ((eq? (isDeclared state variable) #t)
+       
        ;then return the value of the index of the variable in assignments
-       (getIndexValue (indexof variable (declared state)) (assignments state)))
-      ; throws error, variable has not declared 
-      (else (error "Using variable before declaring")))))
+       (getIndexValue (indexof variable  (declared (current state))) (assignments (current state))))
+      
+      
+      (else (M-state-getVar (cdr state) variable)))))
          
 
 ; updates the value of a variable, returns the entire updated state
@@ -45,31 +57,43 @@
 
     ;then update its value in the assignments list
     (cond
+      
+      ((null? state) (error "Using variable before declaring"))
       ;if variable has been declared
-      ((> (indexof variable (declared state)) -1)
+      ((eq? (isDeclared state variable) #t)
        ;then replace the assigned value with value and return the new state
        ;setindex (state index newvalue)
-       (cons (declared state) (cons (setIndexValue (assignments state) (indexof variable (declared state)) (M-value value state)) '())))
+       (cond 
+         ((null? (cdr state)) 
+           (cons (declared (current state)) (cons (setIndexValue (assignments (current state))
+                                                                 (indexof variable (declared(current state))) (M-value value state)) '())))
+           
+         (else(cons (cons (declared (current state)) (cons (setIndexValue (assignments (current state))
+                                                                 (indexof variable (declared(current state))) (M-value value state)) '())) (cdr state)))))
+       
+       (else (cons (car state) (cons (M-state-setVar (cdr state) variable value) '()))))))
       
-      ; else variable has not been declared
-      ;and throw error
+;check if variable has been declared
+(define isDeclared
+  (lambda (state variable)
+    (cond
+       ((> (indexof variable (current(declared state))) -1) #t)
+       (else #f))))
 
-      (else (error "Using variable before declaring")))))
-    
 ;declare variable
-; e-g- var x;
+; e.g. var x;
 (define M-state-declare-var
   (lambda (var state)
-    (cons (myappend var (declared state)) (cons (cons '() (assignments state)) '()))))
+    (cons (myappend var (current(declared state))) (cons (cons '() (current(assignments state))) '()))))
 
 ;declare and initialize
 ; e-g- var x = 5;
 (define M-state-declare-initialize
   (lambda (var value state)
-    (cons (cons var (declared state)) (cons (cons (M-value value state) (assignments state)) '()))))
+    (cons (cons var (current(declared state))) (cons (cons (M-value value state) (current(assignments state))) '()))))
+
 
 ;HELPER METHODS FOR INDEXING THRU STATE
-
 
 (define indexof-helper
   (lambda (x lis break)
@@ -110,3 +134,13 @@
       ((null? lis2) lis)
       (else (cons (car lis) (myappend(cdr lis) lis2))))))
 
+
+; add layer to the state at the beginning of the list
+(define addLayer
+  (lambda (state)
+    (cons '(()()) state)))
+
+; removes the first layer of the list (the most recently added layer)
+(define removeLayer
+  (lambda (state)
+    (cdr state)))
