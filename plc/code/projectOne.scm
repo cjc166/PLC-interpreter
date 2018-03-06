@@ -24,12 +24,12 @@
   (lambda (filename)
       (M-value-expression (parser filename) M-state-init)))
 
-; one statement at a time
+; 
 (define M-value-expression
   (lambda (lis state)
     (M-get-return (M-state-stmt-list lis state))))
 
-;
+; takes each statement one at a time
 (define M-state-stmt-list
   (lambda (slist s)
     (if (null? slist)
@@ -38,13 +38,19 @@
 
 ;evaluates each line
 (define M-state
-  (lambda (lis state)
+  (lambda (lis state break)
     (cond
-      ((eq? (car lis) 'var) (M-state-declare lis state))
+      ((eq? (car lis) 'var) (M-state-declare lis state)) ;var
       ((eq? (car lis) 'while) (M-state-while (cadr lis) (caddr lis) state));while
       ((eq? (car lis) 'if) (M-state-if lis state));if
-      ((eq? (car lis) 'return) (M-state-return state lis))
-      ((eq? (car lis) '=) (M-state-assign lis state))
+      ((eq? (car lis) 'return) (M-state-return state lis)) ;return
+      ((eq? (car lis) '=) (M-state-assign lis state)) ;=
+      ((eq? (car lis) 'break)
+       (cond
+         ((null? (cdr state))
+           (error "Cannot break"))
+         (else  (break state))))
+      ((eq? (car lis) 'begin) (M-state-begin lis state))    
       (else 'badoperator "illegal expression"))))
 
 ; line by line
@@ -236,4 +242,11 @@
 (define M-state-return
   (lambda (state lis)
     (M-set-return state lis)))
+
+
+;to handle blocks
+(define M-state-begin
+ (lambda (state lis)
+  (removeLayer (M-state lis (addLayer state)))))
+
 
